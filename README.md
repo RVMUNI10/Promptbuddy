@@ -1,0 +1,2 @@
+# Promptbuddy
+promptbuddy_extension
