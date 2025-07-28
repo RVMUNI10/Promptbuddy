@@ -1,0 +1,14 @@
+{
+  "templates": [
+    {
+      "type": "Role Instruction",
+      "keywords": ["act as", "behave like", "role-play as"],
+      "template": "Act as a {role}. Your objective is to {objective}. The format should be {format}, and the constraints are {constraints}."
+    },
+    {
+      "type": "Creative Generation",
+      "keywords": ["write a story", "create a poem", "generate a script"],
+      "template": "Generate a creative piece about {topic}. The tone should be {tone}, and the length should be around {length} words."
+    }
+  ]
+}
