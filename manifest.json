@@ -5,8 +5,10 @@
   "description": "Enhances prompts on any webpage.",
   "permissions": [
     "activeTab",
-    "scripting"
+    "scripting",
+    "storage"
   ],
+  "options_page": "settings/settings.html",
   "background": {
     "service_worker": "background.js"
   },

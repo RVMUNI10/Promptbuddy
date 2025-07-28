@@ -1,43 +1,35 @@
-let templates = [];
-
-fetch('promptTemplates.json')
-  .then(response => response.json())
-  .then(data => {
-    templates = data.templates;
-    console.log('Prompt templates loaded:', templates);
-  })
-  .catch(error => console.error('Error loading prompt templates:', error));
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === 'prompt') {
     const originalPrompt = request.text;
-    const enhancedPrompt = enhancePrompt(originalPrompt);
-    chrome.storage.local.set({ originalPrompt, enhancedPrompt });
+    chrome.storage.sync.get('apiKey', (data) => {
+      if (data.apiKey) {
+        enhancePromptWithOpenAI(originalPrompt, data.apiKey);
+      } else {
+        chrome.storage.local.set({ originalPrompt, enhancedPrompt: 'Error: API key not set.' });
+      }
+    });
   }
 });
 
-function enhancePrompt(text) {
-  if (!templates || templates.length === 0) {
-    console.error('No templates loaded.');
-    return text; // No templates loaded, return original text
-  }
+async function enhancePromptWithOpenAI(prompt, apiKey) {
+  const response = await fetch('https://api.openai.com/v1/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: 'text-davinci-003',
+      prompt: `Enhance the following prompt to be more structured and detailed:\n\n${prompt}`,
+      max_tokens: 150
+    })
+  });
 
-  for (const template of templates) {
-    for (const keyword of template.keywords) {
-      if (text.toLowerCase().includes(keyword)) {
-        // This is a simple placeholder replacement. A more advanced implementation
-        // would use NLP to extract the relevant information from the original prompt.
-        let enhanced = template.template;
-        const placeholders = enhanced.match(/\{(\w+)\}/g);
-        if (placeholders) {
-          placeholders.forEach(placeholder => {
-            const key = placeholder.slice(1, -1);
-            enhanced = enhanced.replace(placeholder, `[${key}]`);
-          });
-        }
-        return enhanced;
-      }
-    }
+  const data = await response.json();
+  if (data.choices && data.choices.length > 0) {
+    const enhancedPrompt = data.choices[0].text.trim();
+    chrome.storage.local.set({ originalPrompt: prompt, enhancedPrompt });
+  } else {
+    chrome.storage.local.set({ originalPrompt: prompt, enhancedPrompt: 'Error: Failed to enhance prompt.' });
   }
-  return text; // No match found
 }
