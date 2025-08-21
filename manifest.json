@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "Prompt Buddy",
+  "short_name": "PromptBuddy",
+  "version": "0.7.0",
+  "description": "Write effective AI prompts with an on-demand assistant.",
+
+  "action": {
+    "default_title": "Prompt Buddy",
+    "default_popup": "popup/popup.html"
+  },
+  "options_page": "settings.html",
+
+  "icons": {
+    "16": "assets/icon.png",
+    "32": "assets/icon.png",
+    "128": "assets/icon.png"
+  },
+
+  "permissions": ["activeTab", "storage", "scripting", "clipboardWrite"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js" },
+
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+
+  "commands": {
+    "toggle-prompt-buddy": {
+      "suggested_key": { "default": "Alt+P", "mac": "Alt+P" },
+      "description": "Open Prompt Buddy"
+    }
+  },
+
+  "web_accessible_resources": [
+    { "resources": ["assets/icon.png"], "matches": ["<all_urls>"] }
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://api.openai.com"
+  }
+}
